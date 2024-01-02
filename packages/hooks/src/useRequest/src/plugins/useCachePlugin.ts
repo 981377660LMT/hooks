@@ -10,9 +10,13 @@ import { trigger, subscribe } from '../utils/cacheSubscribe';
 const useCachePlugin: Plugin<any, any[]> = (
   fetchInstance,
   {
+    // 请求唯一标识。如果设置了 cacheKey，我们会启用缓存机制。同一个 cacheKey 的数据全局同步。
     cacheKey,
+    // 设置数据缓存时间，超过该时间，我们会清空该条缓存数据。
     cacheTime = 5 * 60 * 1000,
+    // 设置数据保持新鲜时间，在该时间内，我们认为数据是新鲜的，不会重新发起请求。
     staleTime = 0,
+    // 通过配置 setCache 和 getCache，可以自定义数据缓存，比如可以将数据存储到 localStorage、IndexDB 等。
     setCache: customSetCache,
     getCache: customGetCache,
   },
@@ -90,10 +94,12 @@ const useCachePlugin: Plugin<any, any[]> = (
         };
       }
     },
+    // 缓存 promise。保证同一时间点，采用了同一个 cacheKey 的请求只有一个请求被发起。
     onRequest: (service, args) => {
       let servicePromise = getCachePromise(cacheKey);
 
       // If has servicePromise, and is not trigger by self, then use it
+      // 如果有servicePromise，并且不等于之前自己触发的请求，那么就使用它。
       if (servicePromise && servicePromise !== currentPromiseRef.current) {
         return { servicePromise };
       }

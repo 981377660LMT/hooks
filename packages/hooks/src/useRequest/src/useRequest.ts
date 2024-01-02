@@ -9,6 +9,7 @@ import useThrottlePlugin from './plugins/useThrottlePlugin';
 import type { Options, Plugin, Service } from './types';
 import useRequestImplement from './useRequestImplement';
 
+
 // function useRequest<TData, TParams extends any[], TFormated, TTFormated extends TFormated = any>(
 //   service: Service<TData, TParams>,
 //   options: OptionsWithFormat<TData, TParams, TFormated, TTFormated>,
@@ -25,6 +26,8 @@ function useRequest<TData, TParams extends any[]>(
   plugins?: Plugin<TData, TParams>[],
 ) {
   return useRequestImplement<TData, TParams>(service, options, [
+    // 插件列表，用来拓展功能，一般用户不使用。文档中没有看到暴露 API
+    // 用户可以自定义插件拓展功能，目前官方文档没有写明，估计是不希望我们这么用。
     ...(plugins || []),
     useDebouncePlugin,
     useLoadingDelayPlugin,

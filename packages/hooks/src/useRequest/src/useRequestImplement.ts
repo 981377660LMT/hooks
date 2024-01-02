@@ -31,18 +31,24 @@ function useRequestImplement<TData, TParams extends any[]>(
 
   const update = useUpdate();
 
+  // 保证请求实例都不会发生改变
   const fetchInstance = useCreation(() => {
+    // 目前只有 useAutoRunPlugin 这个 plugin 有这个方法
+    // 初始化状态，initState 值为 { loading: xxx }，代表是否 loading
     const initState = plugins.map((p) => p?.onInit?.(fetchOptions)).filter(Boolean);
 
+    // !整个 useRequest 的核心代码，它处理了整个请求的生命周期。
     return new Fetch<TData, TParams>(
       serviceRef,
       fetchOptions,
-      update,
+      update,  // 更新组件
       Object.assign({}, ...initState),
     );
   }, []);
+
   fetchInstance.options = fetchOptions;
-  // run all plugins hooks
+
+  // 执行所有的 plugin。每个 plugin 中都返回的方法，可以在特定时机执行。
   fetchInstance.pluginImpls = plugins.map((p) => p(fetchInstance, fetchOptions));
 
   useMount(() => {
@@ -63,13 +69,19 @@ function useRequestImplement<TData, TParams extends any[]>(
     data: fetchInstance.state.data,
     error: fetchInstance.state.error,
     params: fetchInstance.state.params || [],
+
     cancel: useMemoizedFn(fetchInstance.cancel.bind(fetchInstance)),
     refresh: useMemoizedFn(fetchInstance.refresh.bind(fetchInstance)),
     refreshAsync: useMemoizedFn(fetchInstance.refreshAsync.bind(fetchInstance)),
     run: useMemoizedFn(fetchInstance.run.bind(fetchInstance)),
     runAsync: useMemoizedFn(fetchInstance.runAsync.bind(fetchInstance)),
     mutate: useMemoizedFn(fetchInstance.mutate.bind(fetchInstance)),
+    
   } as Result<TData, TParams>;
 }
 
+
+
 export default useRequestImplement;
+
+

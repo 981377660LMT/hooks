@@ -98,6 +98,8 @@ export type Plugin<TData, TParams extends any[]> = {
     TData,
     TParams
   >;
+
+
   onInit?: (options: Options<TData, TParams>) => Partial<FetchState<TData, TParams>>;
 };
 
